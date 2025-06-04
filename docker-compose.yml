@@ -1,0 +1,32 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: consult
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/consult
+      SECRET_KEY: please_change_me
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+volumes:
+  pgdata:
