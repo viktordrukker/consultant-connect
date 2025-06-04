@@ -17,6 +17,8 @@ This document explains how to deploy the Consultant Connect stack to a single He
    git clone <repository-url> /opt/consultant-connect
    ```
 3. Add an `.env` file under `/opt/consultant-connect` if you need to override database credentials or other environment variables.
+   The frontend uses `VITE_API_URL` to know where the backend is located. In production set this
+   to `https://thedrukkers.com/api` or your domain.
 4. (Optional) Configure a reverse proxy such as Caddy or Nginx to expose ports 80/443 and route requests to the `frontend` (port 3000) and `backend` (port 8000) containers.
 
 ## GitHub secrets
