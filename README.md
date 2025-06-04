@@ -44,6 +44,9 @@ docker compose up --build
 
 This starts a FastAPI backend, a PostgreSQL database and a Vite dev server. The frontend is available at `http://localhost:3000` and the backend at `http://localhost:8000`. Environment variables can be configured in `.env.example`.
 
+The frontend reads `VITE_API_URL` to know the backend URL (defaults to `/api`).
+=======
+
 ## Core MVP Features
 
 * User Registration/Login (Seeker, Consultant)
