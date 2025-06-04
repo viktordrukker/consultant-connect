@@ -41,7 +41,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /opt/consultant-connect
             git config --global --add safe.directory /opt/consultant-connect
+            cd /opt/consultant-connect
             git pull
             docker compose -f docker-compose.yml up -d --build
