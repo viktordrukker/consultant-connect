@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: ghcr.io/${{ github.repository }}/frontend:latest
+    container_name: consultant-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: https://consultant.thedrukkers.com/api
+    networks:
+      - caddy_net
+
+  backend:
+    image: ghcr.io/${{ github.repository }}/backend:latest
+    container_name: consultant-backend
+    restart: unless-stopped
+    environment:
+      POSTGRES_SERVER: ff_postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: consultant_connect
+    networks:
+      - caddy_net
+
+networks:
+  caddy_net:
+    external: true

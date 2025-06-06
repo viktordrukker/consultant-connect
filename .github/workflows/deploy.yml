@@ -10,30 +10,53 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node
+      # Set up Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install and build frontend
-        working-directory: frontend
-        run: |
-          npm ci --ignore-scripts
-          npm run build --if-present
+      # Build and push frontend Docker image
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: frontend
+          file: frontend/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/frontend:latest
+          secrets: |
+            "username=${{ github.actor }}"
+            "password=${{ secrets.GITHUB_TOKEN }}"
 
+      # Build and push backend Docker image
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository }}/backend:latest
+          secrets: |
+            "username=${{ github.actor }}"
+            "password=${{ secrets.GITHUB_TOKEN }}"
+
+      # Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
+      # Install backend dependencies
       - name: Install backend dependencies
         working-directory: backend
         run: |
           pip install -r requirements.txt
 
+      # Basic compilation test
       - name: Basic compilation test
         run: python -m compileall backend
 
+      # Deploy to Hetzner
       - name: Deploy to Hetzner
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -41,7 +64,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            git config --global --add safe.directory /opt/consultant-connect
             cd /opt/consultant-connect
-            git pull
-            docker compose -f docker-compose.yml up -d --build
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
