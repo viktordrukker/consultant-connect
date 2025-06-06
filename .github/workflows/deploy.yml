@@ -64,7 +64,19 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            # Create directory if it doesn't exist
+            if [ ! -d "/opt/consultant-connect" ]; then
+              mkdir -p /opt/consultant-connect
+              git clone https://github.com/viktordrukker/consultant-connect.git /opt/consultant-connect
+            fi
+            
             cd /opt/consultant-connect
+            git pull
             docker compose -f docker-compose.prod.yml down
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            
+            # Initialize database if needed
+            if ! docker exec consultant-backend alembic current >/dev/null 2>&1; then
+              docker exec consultant-backend alembic upgrade head
+            fi
